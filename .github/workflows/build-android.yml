@@ -9,6 +9,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: ./diet-tracker
 
     steps:
       - name: Checkout
@@ -33,32 +36,20 @@ jobs:
           api-level: 34
           ndk-version: r26c
 
-      - name: Cache node_modules
-        uses: actions/cache@v4
-        with:
-          path: diet-tracker/node_modules
-          key: ${{ runner.os }}-node-${{ hashFiles('diet-tracker/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-
       - name: Install dependencies
         run: npm ci
-        working-directory: ./diet-tracker
 
       - name: Build web app
         run: npm run build
-        working-directory: ./diet-tracker
 
       - name: Sync Capacitor
         run: npx cap sync android
-        working-directory: ./diet-tracker
 
       - name: Build Debug APK
         run: |
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug
-        working-directory: ./diet-tracker
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
